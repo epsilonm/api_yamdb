@@ -1,5 +1,7 @@
 from django.db import models
 
+from ..users.models import User
+
 
 class Category(models.Model):
     name = models.CharField(
@@ -44,3 +46,55 @@ class Title(models.Model):
         related_name='titles',
         null=True
     )
+
+
+class Review(models.Model):
+
+    text = models.TextField(
+        verbose_name='Текст отзыва',
+        help_text='Введите текст отзыва'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        verbose_name='Автор'
+    )
+    title = models.ForeignKey(
+        Title,
+        verbose_name='Произведение',
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    pub_date = models.DateTimeField(
+        'Дата публикации',
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return self.text[:15]
+
+
+class Comment(models.Model):
+    text = models.TextField()
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Автор'
+    )
+    review = models.ForeignKey(
+        Review,
+        verbose_name='Комментарии',
+        on_delete=models.CASCADE,
+        related_name='comments',
+        blank=True,
+        null=True
+    )
+    created = models.DateTimeField(
+        'Дата добавления',
+        auto_now_add=True, db_index=True
+    )
+
+    def __str__(self):
+        return self.text[:15]
