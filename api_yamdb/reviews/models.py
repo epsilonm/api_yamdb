@@ -6,6 +6,11 @@ class Category(models.Model):
         max_length=256,
         verbose_name='Название'
     )
+    slug = models.SlugField(
+        max_length=50,
+        verbose_name='Идентификатор',
+        unique=True
+    )
 
 
 class Genre(models.Model):
