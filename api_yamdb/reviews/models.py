@@ -83,6 +83,24 @@ class Title(models.Model):
         ordering = ['name']
 
 
+class GenreTitle(models.Model):
+    title = models.ForeignKey(
+        Title,
+        verbose_name='Произведение',
+        on_delete=models.CASCADE)
+    genre = models.ForeignKey(
+        Genre,
+        verbose_name='Жанр',
+        on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.title}, жанр - {self.genre}'
+
+    class Meta:
+        verbose_name = 'Произведение и жанр'
+        verbose_name_plural = 'Произведения и жанры'
+
+
 class Review(models.Model):
 
     text = models.TextField(
@@ -132,7 +150,7 @@ class Comment(models.Model):
         null=True
     )
     pub_date = models.DateTimeField(
-        'Дата добавления',
+        'Дата публикации',
         auto_now_add=True, db_index=True
     )
 
