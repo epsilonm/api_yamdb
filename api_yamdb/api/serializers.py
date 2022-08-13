@@ -1,22 +1,48 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
+from rest_framework.validators import UniqueValidator
 
-from django.shortcuts import get_object_or_404
 
 User = get_user_model()
 
 
 class UsersSerializer(serializers.ModelSerializer):
-    role = serializers.ChoiceField(choices=settings.USER_ROLES)
+    role = serializers.ChoiceField(choices=settings.USER_ROLES,
+                                   required=False,
+                                   )
+    username = serializers.CharField(required=True,
+                                     validators=[UniqueValidator(
+                                         queryset=User.objects.all()
+                                     )])
+    email = serializers.EmailField(required=True,
+                                     validators=[UniqueValidator(
+                                         queryset=User.objects.all()
+                                     )])
 
     class Meta:
-        fields = ('first_name', 'last_name', 'username',
-                  'bio', 'role', 'email')
         model = User
+        fields = ('username', 'email', 'first_name', 'last_name',
+                  'bio', 'role')
+
+
+class UserPatchSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=True,
+                                     validators=[UniqueValidator(
+                                         queryset=User.objects.all()
+                                     )])
+    email = serializers.EmailField(required=True,
+                                   validators=[UniqueValidator(
+                                       queryset=User.objects.all()
+                                   )])
+    role = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name', 'last_name',
+                  'bio', 'role')
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -46,7 +72,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
 class UserJWTTokenCreateSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField()
     username = serializers.CharField()
+
     class Meta:
         model = User
         fields = ('confirmation_code', 'username')
-

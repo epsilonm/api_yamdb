@@ -2,8 +2,15 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
 
-class User(AbstractUser):
+from users.validators import validate_username
 
+class User(AbstractUser):
+    username = models.CharField(
+        verbose_name='Username',
+        max_length=154,
+        validators=[validate_username],
+        unique=True
+    )
     bio = models.TextField(
         'Biography',
         blank=True,
@@ -26,7 +33,6 @@ class User(AbstractUser):
     role = models.CharField(max_length=9,
                             choices=settings.USER_ROLES,
                             default='user')
-    is_active = True
     password = models.CharField(
         verbose_name='Password',
         max_length=150,
@@ -35,3 +41,6 @@ class User(AbstractUser):
     confirmation_code = models.CharField(max_length=100, blank=True)
 
     REQUIRED_FIELDS = ['email']
+
+
+
