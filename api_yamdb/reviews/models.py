@@ -65,6 +65,11 @@ class Title(models.Model):
         related_name='titles',
         null=True
     )
+    rate = models.IntegerField(
+        verbose_name='Рейтинг',
+        null=True,
+        default=None
+    )
 
     def __str__(self):
         return self.name
