@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from ..users.models import User
@@ -65,6 +66,11 @@ class Review(models.Model):
         verbose_name='Произведение',
         on_delete=models.CASCADE,
         related_name='reviews'
+    )
+    mark = models.PositiveSmallIntegerField(
+        verbose_name='Оценка',
+        validators=(MinValueValidator(1, 'Оценка должна быть от 1 до 10'),
+                    MaxValueValidator(10, 'Оценка должна быть от 1 до 10'))
     )
     pub_date = models.DateTimeField(
         'Дата публикации',
