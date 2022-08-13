@@ -1,7 +1,7 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-from ..users.models import User
+from users.models import User
 
 
 class Category(models.Model):
@@ -101,7 +101,7 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name='reviews'
     )
-    mark = models.PositiveSmallIntegerField(
+    score = models.PositiveSmallIntegerField(
         verbose_name='Оценка',
         validators=(MinValueValidator(1, 'Оценка должна быть от 1 до 10'),
                     MaxValueValidator(10, 'Оценка должна быть от 1 до 10'))
@@ -131,7 +131,7 @@ class Comment(models.Model):
         blank=True,
         null=True
     )
-    created = models.DateTimeField(
+    pub_date = models.DateTimeField(
         'Дата добавления',
         auto_now_add=True, db_index=True
     )
