@@ -20,12 +20,12 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-        ordering = ['name'] 
+        ordering = ['name']
 
 
 class Genre(models.Model):
     name = models.CharField(
-        max_length=256,   
+        max_length=256,
         verbose_name='Название'
     )
     slug = models.SlugField(
@@ -68,15 +68,19 @@ class Title(models.Model):
         related_name='titles',
         null=True
     )
+    rate = models.IntegerField(
+        verbose_name='Рейтинг',
+        null=True,
+        default=None
+    )
 
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
         ordering = ['name']
-
-    def __str__(self):
-        return self.name
 
 
 class Review(models.Model):
@@ -97,7 +101,7 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name='reviews'
     )
-    mark = models.PositiveSmallIntegerField(
+    score = models.PositiveSmallIntegerField(
         verbose_name='Оценка',
         validators=(MinValueValidator(1, 'Оценка должна быть от 1 до 10'),
                     MaxValueValidator(10, 'Оценка должна быть от 1 до 10'))
@@ -127,16 +131,10 @@ class Comment(models.Model):
         blank=True,
         null=True
     )
-    created = models.DateTimeField(
-        'Дата добавления',
+    pub_date = models.DateTimeField(
+        'Дата публикации',
         auto_now_add=True, db_index=True
     )
 
     def __str__(self):
         return self.text[:15]
-
-    rate = models.IntegerField(
-        verbose_name='Рейтинг',
-        null=True,
-        default=None
-    )
