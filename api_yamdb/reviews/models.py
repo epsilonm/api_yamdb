@@ -1,7 +1,7 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-from ..users.models import User
+from users.models import User
 
 
 class Category(models.Model):
@@ -21,7 +21,6 @@ class Category(models.Model):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
         ordering = ['name'] 
-
 
 
 class Genre(models.Model):
@@ -69,6 +68,15 @@ class Title(models.Model):
         related_name='titles',
         null=True
     )
+
+
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
 
 
 class Review(models.Model):
@@ -132,12 +140,3 @@ class Comment(models.Model):
         null=True,
         default=None
     )
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = 'Произведение'
-        verbose_name_plural = 'Произведения'
-        ordering = ['name']
-
