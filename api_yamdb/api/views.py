@@ -1,25 +1,20 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.decorators import action
 from http import HTTPStatus
-import logging
+from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework import viewsets, mixins
 
 from users.models import User
-from .serializers import UsersSerializer, CreateUserSerializer, UserJWTTokenCreateSerializer, UserPatchSerializer
-from .permissions import IsAdmin, IsUser
+from reviews.models import Category, Genre, Title
+from .permissions import IsAdmin
+from .serializers import (UsersSerializer, CreateUserSerializer,
+                          UserJWTTokenCreateSerializer, UserPatchSerializer,
+                          CategorySerializer, GenreSerializer, TitleSerializer
+                          )
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format=('%(asctime)s, %(levelname)s, '
-            ' %(message)s, '
-            'in function: %(funcName)s, '
-            'line: %(lineno)d'),
-    filename='example.log')
 
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -73,3 +68,32 @@ class UserJWTTokenCreateView(APIView):
                 return Response('Confirmation code is incorrect!', status=HTTPStatus.BAD_REQUEST)
             return Response('User with this username does not exist', status=HTTPStatus.NOT_FOUND)
         return Response(data=serializer.errors, status=HTTPStatus.BAD_REQUEST)
+
+
+class ListCreateDestroyViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
+
+
+class CategoryViewSet(ListCreateDestroyViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    search_fields = ("name",)
+    lookup_field = "slug"
+
+
+class GenreViewSet(ListCreateDestroyViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    search_fields = ("name",)
+    lookup_field = "slug"
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+

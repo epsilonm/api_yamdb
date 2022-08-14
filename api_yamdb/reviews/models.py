@@ -7,13 +7,21 @@ from ..users.models import User
 class Category(models.Model):
     name = models.CharField(
         max_length=256,
-        verbose_name='Название'
-    )
+        verbose_name='Название')
+
     slug = models.SlugField(
         max_length=50,
-        verbose_name='Идентификатор',
-        unique=True
-    )
+        verbose_name='ID',
+        unique=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        ordering = ['name'] 
+
 
 
 class Genre(models.Model):
@@ -21,6 +29,19 @@ class Genre(models.Model):
         max_length=256,   
         verbose_name='Название'
     )
+    slug = models.SlugField(
+        verbose_name='ID',
+        max_length=50,
+        unique=True
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+        ordering = ['name']
 
 
 class Title(models.Model):
@@ -39,6 +60,7 @@ class Title(models.Model):
     genre = models.ManyToManyField(
         Genre,
         verbose_name='Жанр'
+
     )
     category = models.ForeignKey(
         Category,
@@ -104,3 +126,18 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text[:15]
+
+    rate = models.IntegerField(
+        verbose_name='Рейтинг',
+        null=True,
+        default=None
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+        ordering = ['name']
+
