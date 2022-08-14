@@ -114,6 +114,17 @@ class Review(models.Model):
     def __str__(self):
         return self.text[:15]
 
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        ordering = ['pub_date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_review'
+            ),
+        ]
+
 
 class Comment(models.Model):
     text = models.TextField()
@@ -138,3 +149,8 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text[:15]
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        ordering = ['pub_date']

@@ -4,6 +4,7 @@ from django.conf import settings
 
 from users.validators import validate_username
 
+
 class User(AbstractUser):
     username = models.CharField(
         verbose_name='Username',

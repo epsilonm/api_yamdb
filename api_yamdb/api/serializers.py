@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework.validators import UniqueValidator
 
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review
 
 User = get_user_model()
 
@@ -111,4 +111,20 @@ class TitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
+        fields = '__all__'
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+        default=serializers.CurrentUserDefault()
+    )
+    title = serializers.SlugRelatedField(
+        slug_field='name',
+        read_only=True,
+    )
+
+    class Meta:
+        model = Review
         fields = '__all__'

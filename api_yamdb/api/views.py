@@ -1,18 +1,20 @@
 from http import HTTPStatus
+
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, permissions
 
 from users.models import User
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review
 from .permissions import IsAdmin
 from .serializers import (UsersSerializer, CreateUserSerializer,
                           UserJWTTokenCreateSerializer, UserPatchSerializer,
-                          CategorySerializer, GenreSerializer, TitleSerializer
+                          CategorySerializer, GenreSerializer, TitleSerializer,
+                          ReviewSerializer
                           )
 
 
@@ -24,7 +26,7 @@ class UsersViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
 
     @action(methods=['patch', 'get'], detail=False,
-            permission_classes=[IsAuthenticated],
+            permission_classes=[permissions.IsAuthenticated],
             url_path='me', url_name='me',
             serializer_class=UserPatchSerializer)
     def me(self, request, *args, **kwargs):
@@ -40,7 +42,7 @@ class UsersViewSet(viewsets.ModelViewSet):
 
 class UserCreateView(APIView):
     serializer_class = CreateUserSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         serializer = self.serializer_class(data=self.request.data)
@@ -52,7 +54,7 @@ class UserCreateView(APIView):
 
 class UserJWTTokenCreateView(APIView):
     serializer_class = UserJWTTokenCreateSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         serializer = self.serializer_class(data=self.request.data)
@@ -96,4 +98,18 @@ class GenreViewSet(ListCreateDestroyViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        return title.reviews.all()
+
+    # def perform_create(self, serializer):
+    #     post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
+    #     serializer.save(author=self.request.user, post=post)
