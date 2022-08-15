@@ -1,15 +1,15 @@
 from http import HTTPStatus
 
 from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, mixins, permissions
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework import viewsets, mixins, permissions
 
-from users.models import User
 from reviews.models import Category, Genre, Title, Review
+from users.models import User
 from .permissions import (IsAdmin, IsOwenAdminModeratorOrReadOnly,
                           IsAdminOrReadOnly)
 from .serializers import (UsersSerializer, CreateUserSerializer,
@@ -62,14 +62,31 @@ class UserJWTTokenCreateView(APIView):
             confirmation_code = serializer.data.get('confirmation_code')
             username = serializer.data.get('username')
             if User.objects.filter(username=username).exists():
-                if User.objects.filter(username=username,
-                                       confirmation_code=confirmation_code).exists():
-                    user = User.objects.get(username=username, confirmation_code=confirmation_code)
+                if User.objects.filter(
+                        username=username,
+                        confirmation_code=confirmation_code
+                ).exists():
+                    user = User.objects.get(
+                        username=username,
+                        confirmation_code=confirmation_code
+                    )
                     token = AccessToken.for_user(user)
-                    return Response(data={'token': str(token)}, status=HTTPStatus.OK)
-                return Response('Confirmation code is incorrect!', status=HTTPStatus.BAD_REQUEST)
-            return Response('User with this username does not exist', status=HTTPStatus.NOT_FOUND)
-        return Response(data=serializer.errors, status=HTTPStatus.BAD_REQUEST)
+                    return Response(
+                        data={'token': str(token)},
+                        status=HTTPStatus.OK
+                    )
+                return Response(
+                    'Confirmation code is incorrect!',
+                    status=HTTPStatus.BAD_REQUEST
+                )
+            return Response(
+                'User with this username does not exist',
+                status=HTTPStatus.NOT_FOUND
+            )
+        return Response(
+            data=serializer.errors,
+            status=HTTPStatus.BAD_REQUEST
+        )
 
 
 class ListCreateDestroyViewSet(
