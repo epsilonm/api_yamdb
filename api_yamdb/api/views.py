@@ -10,7 +10,7 @@ from rest_framework import viewsets, mixins, permissions
 
 from users.models import User
 from reviews.models import Category, Genre, Title, Review
-from .permissions import IsAdmin
+from .permissions import IsAdmin, IsOwenAdminModeratorOrReadOnly
 from .serializers import (UsersSerializer, CreateUserSerializer,
                           UserJWTTokenCreateSerializer, UserPatchSerializer,
                           CategorySerializer, GenreSerializer, TitleSerializer,
@@ -102,7 +102,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsOwenAdminModeratorOrReadOnly,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -115,7 +115,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsOwenAdminModeratorOrReadOnly,)
 
     def get_queryset(self):
         review = get_object_or_404(
