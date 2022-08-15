@@ -10,12 +10,12 @@ from rest_framework import viewsets, mixins, permissions
 
 from users.models import User
 from reviews.models import Category, Genre, Title, Review
-from .permissions import IsAdmin, IsOwenAdminModeratorOrReadOnly
+from .permissions import (IsAdmin, IsOwenAdminModeratorOrReadOnly,
+                          IsAdminOrReadOnly)
 from .serializers import (UsersSerializer, CreateUserSerializer,
                           UserJWTTokenCreateSerializer, UserPatchSerializer,
                           CategorySerializer, GenreSerializer, TitleSerializer,
-                          ReviewSerializer, CommentSerializer
-                          )
+                          ReviewSerializer, CommentSerializer)
 
 
 class UsersViewSet(viewsets.ModelViewSet):
@@ -84,6 +84,7 @@ class ListCreateDestroyViewSet(
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly,)
     search_fields = ("name",)
     lookup_field = "slug"
 
@@ -91,6 +92,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
     search_fields = ("name",)
     lookup_field = "slug"
 
@@ -98,6 +100,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
