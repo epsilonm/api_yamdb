@@ -3,9 +3,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueValidator
 
-from reviews.models import Category, Genre, Title, Review
+from reviews.models import Category, Genre, Title, Review, Comment
 
 User = get_user_model()
 
@@ -123,8 +125,31 @@ class ReviewSerializer(serializers.ModelSerializer):
     title = serializers.SlugRelatedField(
         slug_field='name',
         read_only=True,
+        # queryset=Title.objects.all()
     )
 
     class Meta:
         model = Review
+        fields = '__all__'
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=Title.objects.all(),
+                fields=('title', 'author'),
+                message='Можно оставлять только один отзыв на произведение'
+            )
+        ]
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    review = serializers.SlugRelatedField(
+        slug_field='text',
+        read_only=True
+    )
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
+
+    class Meta:
+        model = Comment
         fields = '__all__'
