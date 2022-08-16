@@ -11,6 +11,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Genre, Title, Review
 from users.models import User
+from .filters import TitleFilter
 from .permissions import (IsAdmin, IsOwenAdminModeratorOrReadOnly,
                           IsAdminOrReadOnly)
 from .serializers import (UsersSerializer, CreateUserSerializer,
@@ -122,7 +123,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('category', 'genre', 'name', 'year')
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.request.method in ['POST', 'PATCH']:
