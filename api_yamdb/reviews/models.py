@@ -68,7 +68,7 @@ class Title(models.Model):
         related_name='titles',
         null=True
     )
-    rate = models.IntegerField(
+    rating = models.IntegerField(
         verbose_name='Рейтинг',
         null=True,
         default=None
