@@ -15,8 +15,9 @@ from .permissions import (IsAdmin, IsOwenAdminModeratorOrReadOnly,
                           IsAdminOrReadOnly)
 from .serializers import (UsersSerializer, CreateUserSerializer,
                           UserJWTTokenCreateSerializer, UserPatchSerializer,
-                          CategorySerializer, GenreSerializer, TitleSerializer,
-                          ReviewSerializer, CommentSerializer)
+                          CategorySerializer, GenreSerializer,
+                          ReviewSerializer, CommentSerializer,
+                          TitlesEditorSerializer, TitlesReadSerializer)
 
 
 class UsersViewSet(viewsets.ModelViewSet):
@@ -119,10 +120,14 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category', 'genre', 'name', 'year')
+
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PATCH']:
+            return TitlesEditorSerializer
+        return TitlesReadSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
