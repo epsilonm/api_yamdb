@@ -1,14 +1,15 @@
-from django.db.models import Avg
-from rest_framework import serializers
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.conf import settings
+from django.db.models import Avg
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Genre, Title, Review, Comment
+from .validators import UserNameValidator
 
 User = get_user_model()
 
@@ -22,12 +23,13 @@ class UsersSerializer(serializers.ModelSerializer):
                                          queryset=User.objects.all()
                                      )])
     email = serializers.EmailField(required=True,
-                                     validators=[UniqueValidator(
-                                         queryset=User.objects.all()
-                                     )])
+                                   validators=[UniqueValidator(
+                                       queryset=User.objects.all()
+                                   )])
 
     class Meta:
         model = User
+        validators = [UserNameValidator]
         fields = ('username', 'email', 'first_name', 'last_name',
                   'bio', 'role')
 
@@ -45,6 +47,7 @@ class UserPatchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
+        validators = [UserNameValidator]
         fields = ('username', 'email', 'first_name', 'last_name',
                   'bio', 'role')
 
@@ -53,6 +56,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('username', 'email')
+        validators = [UserNameValidator]
         extra_kwargs = {'confirmation_code': {'write_only': True}}
         model = User
 

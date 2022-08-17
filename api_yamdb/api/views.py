@@ -11,11 +11,9 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Genre, Title, Review
 from users.models import User
-
-
 from .filters import TitleFilter
-from .permissions import (IsAdmin, IsAdminOrReadOnly, IsOwner, IsModeratorUser,
-                          IsOwenAdminModeratorOrReadOnly)
+from .permissions import (IsAdmin, IsAdminOrReadOnly,
+                          IsOwnerAdminModeratorOrReadOnly)
 from .serializers import (UsersSerializer, CreateUserSerializer,
                           UserJWTTokenCreateSerializer, UserPatchSerializer,
                           CategorySerializer, GenreSerializer,
@@ -23,24 +21,12 @@ from .serializers import (UsersSerializer, CreateUserSerializer,
                           TitlesEditorSerializer, TitlesReadSerializer)
 
 
-class ReviewCommentViewSet(viewsets.ModelViewSet):
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            self.permission_classes = [permissions.AllowAny]
-        if self.request.method == 'POST':
-            self.permission_classes = [permissions.IsAuthenticated]
-        if (self.request.method == 'PATCH'
-                or self.request.method == 'DELETE'):
-            self.permission_classes = [IsAdmin, IsOwner, IsModeratorUser]
-
-        return super(ReviewCommentViewSet, self).get_permissions()
-
-
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     permission_classes = [IsAdmin]
     serializer_class = UsersSerializer
     lookup_field = 'username'
+    lookup_value_regex = '[^/]+'
     pagination_class = LimitOffsetPagination
 
     @action(methods=['patch', 'get'], detail=False,
@@ -148,7 +134,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsOwenAdminModeratorOrReadOnly,)
+    permission_classes = (IsOwnerAdminModeratorOrReadOnly,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -161,7 +147,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsOwenAdminModeratorOrReadOnly,)
+    permission_classes = (IsOwnerAdminModeratorOrReadOnly,)
 
     def get_queryset(self):
         review = get_object_or_404(
