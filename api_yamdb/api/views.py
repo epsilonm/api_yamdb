@@ -14,13 +14,13 @@ from users.models import User
 
 
 from .filters import TitleFilter
-from .permissions import (IsAdmin, IsOwenAdminModeratorOrReadOnly,
-                          IsAdminOrReadOnly)
+from .permissions import (IsAdmin, IsAdminOrReadOnly, IsOwner, IsModeratorUser)
 from .serializers import (UsersSerializer, CreateUserSerializer,
                           UserJWTTokenCreateSerializer, UserPatchSerializer,
                           CategorySerializer, GenreSerializer,
                           ReviewSerializer, CommentSerializer,
                           TitlesEditorSerializer, TitlesReadSerializer)
+
 
 class ReviewCommentViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
@@ -33,6 +33,7 @@ class ReviewCommentViewSet(viewsets.ModelViewSet):
             self.permission_classes = [IsAdmin, IsOwner, IsModeratorUser]
 
         return super(ReviewCommentViewSet, self).get_permissions()
+
 
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
