@@ -1,8 +1,9 @@
 import csv
 import os
 
+import django.db.utils
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
-
 from reviews.models import Comment, Review, Category, Genre, Title
 from users.models import User
 
@@ -15,6 +16,10 @@ def read_csv(name_file):
         for row in reader:
             data_list.append(row)
     return data_list
+
+
+def load_data(filds):
+    pass
 
 
 def load_users():
@@ -115,14 +120,132 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
+            '-u',
+            '--users',
+            action='store_true',
+            help='Импортирует пользователей из csv в базу данных'
+        )
+        parser.add_argument(
+            '-cat',
+            '--categories',
+            action='store_true',
+            help='Импортирует категории из csv в базу данных'
+        )
+        parser.add_argument(
+            '-g',
+            '--genres',
+            action='store_true',
+            help='Импортирует жанры из csv в базу данных'
+        )
+        parser.add_argument(
+            '-t',
+            '--titles',
+            action='store_true',
+            help='Импортирует произведения из csv в базу данных'
+        )
+        parser.add_argument(
+            '-gt',
+            '--genre_title',
+            action='store_true',
+            help='Импортирует отношения жанров с произведениями'
+                 ' из csv в базу данных'
+        )
+        parser.add_argument(
+            '-rv',
+            '--reviews',
+            action='store_true',
+            help='Импортирует отзывы из csv в базу данных'
+        )
+        parser.add_argument(
+            '-com',
+            '--comments',
+            action='store_true',
+            help='Импортирует комментарии из csv в базу данных'
+        )
+        parser.add_argument(
             '-a',
             '--all',
             action='store_true',
             help='Импортирует все таблицы из csv в базу данных'
         )
 
+        def get_option(self):
+            options = {
+
+            }
+
     def handle(self, *args, **options):
-        if options['all']:
+        if options['users']:
+            try:
+                load_users()
+                self.stdout.write(
+                    self.style.SUCCESS('Пользователи загружены в БД'))
+            except django.db.utils.IntegrityError:
+                self.stdout.write(
+                    self.style.WARNING('Пользователи уже существуют'))
+        elif options['categories']:
+            try:
+                load_categories()
+                self.stdout.write(
+                    self.style.SUCCESS('Категории загружены в БД'))
+            except django.db.utils.IntegrityError:
+                self.stdout.write(
+                    self.style.WARNING('Категории уже существуют'))
+        elif options['genres']:
+            try:
+                load_genres()
+                self.stdout.write(
+                    self.style.SUCCESS('Жанры загружены в БД'))
+            except django.db.utils.IntegrityError:
+                self.stdout.write(
+                    self.style.WARNING('Жанры уже существуют'))
+        elif options['titles']:
+            try:
+                load_titles()
+                self.stdout.write(
+                    self.style.SUCCESS('Произведения загружены в БД'))
+            except django.db.utils.IntegrityError:
+                self.stdout.write(
+                    self.style.WARNING('Произведения уже существуют'))
+            except ObjectDoesNotExist:
+                self.stdout.write(
+                    self.style.NOTICE('Нет данных из связанных таблиц'))
+        elif options['genre_title']:
+            try:
+                load_genre_title()
+                self.stdout.write(
+                    self.style.SUCCESS('Отношения жанров с произведениями'
+                                       ' загружены в БД'))
+            except django.db.utils.IntegrityError:
+                self.stdout.write(
+                    self.style.WARNING('Отношения жанров с произведениями '
+                                       'уже существуют'))
+            except ObjectDoesNotExist:
+                self.stdout.write(
+                    self.style.NOTICE('Нет данных из связанных таблиц'))
+        elif options['reviews']:
+            try:
+                load_review()
+                self.stdout.write(
+                    self.style.SUCCESS('Отзывы загружены в БД'))
+            except django.db.utils.IntegrityError:
+                self.stdout.write(
+                    self.style.WARNING('Отзывы уже существуют'))
+            except ObjectDoesNotExist:
+                self.stdout.write(
+                    self.style.NOTICE('Нет данных из связанных таблиц'))
+        elif options['comments']:
+            try:
+                load_comments()
+                self.stdout.write(
+                    self.style.SUCCESS('Комментарии загружены в БД'))
+            except django.db.utils.IntegrityError:
+                self.stdout.write(
+                    self.style.WARNING('Комментарии уже существуют'))
+            except ObjectDoesNotExist:
+                self.stdout.write(
+                    self.style.NOTICE('Нет данных из связанных таблиц'))
+        elif options['all']:
             try:
                 load_users()
                 load_categories()
@@ -138,5 +261,5 @@ class Command(BaseCommand):
                                                    ' "%s"' % e))
         else:
             self.stdout.write(
-                self.style.SQL_KEYWORD('Команда используется с ключом -a,'
-                                       ' или --all'))
+                self.style.SQL_KEYWORD('Команда используется с ключом,'
+                                       ' список всех ключей: --help'))
