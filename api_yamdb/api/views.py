@@ -11,12 +11,16 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Genre, Title, Review
 from users.models import User
-from .permissions import (IsAdmin, IsOwner,
-                          IsAdminOrReadOnly, IsModeratorUser)
+
+
+from .filters import TitleFilter
+from .permissions import (IsAdmin, IsOwenAdminModeratorOrReadOnly,
+                          IsAdminOrReadOnly)
 from .serializers import (UsersSerializer, CreateUserSerializer,
                           UserJWTTokenCreateSerializer, UserPatchSerializer,
-                          CategorySerializer, GenreSerializer, TitleSerializer,
-                          ReviewSerializer, CommentSerializer)
+                          CategorySerializer, GenreSerializer,
+                          ReviewSerializer, CommentSerializer,
+                          TitlesEditorSerializer, TitlesReadSerializer)
 
 class ReviewCommentViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
@@ -130,10 +134,14 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('category', 'genre', 'name', 'year')
+    filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PATCH']:
+            return TitlesEditorSerializer
+        return TitlesReadSerializer
 
 
 class ReviewViewSet(ReviewCommentViewSet):

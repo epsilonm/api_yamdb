@@ -29,7 +29,15 @@ class IsOwner(permissions.BasePermission):
     message = 'Изменить контент может только автор, админ или модератор.'
 
     def has_object_permission(self, request, view, obj):
-        return obj.author == request.user
+        return (
+            request.method in permissions.SAFE_METHODS
+            or obj.author == request.user
+            or request.user.role == 'admin'
+            or request.user.is_superuser
+            or request.user.role == 'moderator'
+            or request.user.role == 'user'
+        )
+        
 
 class IsAdminOrReadOnly(permissions.BasePermission):
     message = 'Изменить контент может только админ.'
