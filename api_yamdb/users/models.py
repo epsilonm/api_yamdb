@@ -1,19 +1,19 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.conf import settings
 
 from users.validators import validate_username
 
 
 class User(AbstractUser):
     username = models.CharField(
-        verbose_name='Username',
+        verbose_name='Имя пользователя',
         max_length=154,
         validators=[validate_username],
         unique=True
     )
     bio = models.TextField(
-        'Biography',
+        'Биография',
         blank=True,
     )
     email = models.EmailField(
@@ -22,12 +22,12 @@ class User(AbstractUser):
         max_length=254,
     )
     first_name = models.CharField(
-        verbose_name='First name',
+        verbose_name='Имя',
         max_length=150,
         blank=True
     )
     last_name = models.CharField(
-        verbose_name='Last name',
+        verbose_name='Фамилия',
         max_length=150,
         blank=True
     )
@@ -35,7 +35,7 @@ class User(AbstractUser):
                             choices=settings.USER_ROLES,
                             default='user')
     password = models.CharField(
-        verbose_name='Password',
+        verbose_name='Пароль',
         max_length=150,
         blank=True
     )
