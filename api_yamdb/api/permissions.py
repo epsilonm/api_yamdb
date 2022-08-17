@@ -10,40 +10,7 @@ class IsAdmin(permissions.BasePermission):
         return False
 
 
-class IsModeratorUser(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.user.is_authenticated and request.user.role == 'moderator':
-            return True
-        return False
-
-
-class IsUser(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            if request.user.role == 'user':
-                return True
-        return False
-
-
-class IsOwner(permissions.BasePermission):
-    message = 'Изменить контент может только автор, админ или модератор.'
-
-    def has_object_permission(self, request, view, obj):
-        return (
-            obj.author.role == request.user
-        )
-        
-
-# class IsAdminOrReadOnly(permissions.BasePermission):
-#     message = 'Изменить контент может только админ.'
-#
-#     def has_permission(self, request, view):
-#         return (request.method in permissions.SAFE_METHODS
-#                 or (request.user.is_authenticated
-#                     and request.user.role == 'admin'))
-
-
-class IsOwenAdminModeratorOrReadOnly(permissions.BasePermission):
+class IsOwnerAdminModeratorOrReadOnly(permissions.BasePermission):
     message = 'Изменить контент может только автор, админ или модератор.'
 
     def has_permission(self, request, view):
@@ -59,7 +26,6 @@ class IsOwenAdminModeratorOrReadOnly(permissions.BasePermission):
             or request.user.role == 'admin'
             or request.user.is_superuser
             or request.user.role == 'moderator'
-            # or request.user.role == 'user'
         )
 
 

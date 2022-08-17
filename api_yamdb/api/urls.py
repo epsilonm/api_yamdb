@@ -22,4 +22,4 @@ urlpatterns = [
     path('v1/', include(router_version_1.urls)),
     path('v1/auth/signup/', UserCreateView.as_view()),
     path('v1/auth/token/', UserJWTTokenCreateView.as_view()),
-    ]
+]

@@ -42,6 +42,3 @@ class User(AbstractUser):
     confirmation_code = models.CharField(max_length=100, blank=True)
 
     REQUIRED_FIELDS = ['email']
-
-
-
