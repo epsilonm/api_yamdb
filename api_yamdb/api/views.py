@@ -14,7 +14,8 @@ from users.models import User
 
 
 from .filters import TitleFilter
-from .permissions import (IsAdmin, IsAdminOrReadOnly, IsOwner, IsModeratorUser)
+from .permissions import (IsAdmin, IsAdminOrReadOnly, IsOwner, IsModeratorUser,
+                          IsOwenAdminModeratorOrReadOnly)
 from .serializers import (UsersSerializer, CreateUserSerializer,
                           UserJWTTokenCreateSerializer, UserPatchSerializer,
                           CategorySerializer, GenreSerializer,
@@ -145,8 +146,9 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitlesReadSerializer
 
 
-class ReviewViewSet(ReviewCommentViewSet):
+class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
+    permission_classes = (IsOwenAdminModeratorOrReadOnly,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -157,8 +159,9 @@ class ReviewViewSet(ReviewCommentViewSet):
         serializer.save(author=self.request.user, title=title)
 
 
-class CommentViewSet(ReviewCommentViewSet):
+class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+    permission_classes = (IsOwenAdminModeratorOrReadOnly,)
 
     def get_queryset(self):
         review = get_object_or_404(
