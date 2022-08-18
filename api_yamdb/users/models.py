@@ -6,6 +6,14 @@ from users.validators import validate_username
 
 
 class User(AbstractUser):
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    USER = 'user'
+    USER_ROLES = (
+        (ADMIN, 'Администратор'),
+        (MODERATOR, 'Модератор'),
+        (USER, 'Пользователь')
+    )
     username = models.CharField(
         verbose_name='Имя пользователя',
         max_length=154,
@@ -26,19 +34,14 @@ class User(AbstractUser):
         max_length=150,
         blank=True
     )
-    last_name = models.CharField(
-        verbose_name='Фамилия',
-        max_length=150,
-        blank=True
-    )
-    role = models.CharField(max_length=9,
-                            choices=settings.USER_ROLES,
+    role = models.CharField(max_length=30,
+                            choices=USER_ROLES,
                             default='user')
-    password = models.CharField(
-        verbose_name='Пароль',
-        max_length=150,
-        blank=True
-    )
-    confirmation_code = models.CharField(max_length=100, blank=True)
 
-    REQUIRED_FIELDS = ['email']
+    @property
+    def is_admin(self):
+        return self.role == User.ADMIN
+
+    @property
+    def is_moderator(self):
+        return self.role == User.MODERATOR
