@@ -1,77 +1,74 @@
 import csv
 import os
 
+import django.db.utils
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
-
 from reviews.models import Comment, Review, Category, Genre, Title
 from users.models import User
 
 
+DATA = {
+    User: 'users.csv',
+    Category: 'category.csv',
+    Genre: 'genre.csv',
+    Title: 'titles.csv',
+    Review: 'review.csv',
+    Comment: 'comments.csv'
+}
+
+
 def read_csv(name_file):
+    """Считывает данные из csv и возвращает список строк таблицы"""
     path = os.path.join('static/data', name_file)
-    data_list = []
     with open(path, encoding='utf-8') as csv_file:
         reader = csv.DictReader(csv_file, delimiter=',')
-        for row in reader:
-            data_list.append(row)
-    return data_list
+        return list(reader)
 
 
-def load_users():
-    data_list = read_csv('users.csv')
-    users = [
-        User(
-            id=row['id'],
-            username=row['username'],
-            email=row['email'],
-            role=row['role']
-        )
-        for row in data_list
-    ]
-    User.objects.bulk_create(users)
+def get_list_fields_model(model):
+    """
+    Принимает объект модели, и возвращает словарь с полями в виде:
+    {<поле модели>: <поле в таблице>}
+    """
+    fields_obj_list = model._meta.fields
+    fields = {
+        field.name: field.attname for field in fields_obj_list
+    }
+    return fields
 
 
-def load_categories():
-    data_list = read_csv('category.csv')
-    categories = [
-        Category(
-            id=row['id'],
-            name=row['name'],
-            slug=row['slug']
-        )
-        for row in data_list
-    ]
-    Category.objects.bulk_create(categories)
+def changes_fields(fields_model, table):
+    """
+    Изменяет название полей прочитанной таблицы
+    для корректной записи в БД
+    """
+    for row in table:
+        for name_field in list(row):
+            if (
+                    name_field in fields_model
+                    and name_field
+                    != fields_model[name_field.replace("_id", "")]
+            ):
+                row[fields_model[name_field]] = row.pop(name_field)
 
 
-def load_genres():
-    data_list = read_csv('genre.csv')
-    genres = [
-        Genre(
-            id=row['id'],
-            name=row['name'],
-            slug=row['slug']
-        )
-        for row in data_list
-    ]
-    Genre.objects.bulk_create(genres)
-
-
-def load_titles():
-    data_list = read_csv('titles.csv')
-    titles = [
-        Title(
-            id=row['id'],
-            name=row['name'],
-            year=row['year'],
-            category=Category.objects.get(id=row['category'])
-        )
-        for row in data_list
-    ]
-    Title.objects.bulk_create(titles)
+def load_data(model, name_file):
+    """
+    Загрузка данных по имени модели.
+    Не загружает данные во вспомогательную таблицу
+    со связью многие ко многим
+    """
+    table = read_csv(name_file)
+    changes_fields(get_list_fields_model(model), table)
+    model.objects.bulk_create(model(**row) for row in table)
 
 
 def load_genre_title():
+    """
+    Загружает данные во вспомогательную таблицу
+    для моделей со связью многие ко многим
+    """
     data_list = read_csv('genre_title.csv')
     [
         Title.objects.get(id=row['title_id']).genre.add(row['genre_id'])
@@ -79,35 +76,10 @@ def load_genre_title():
     ]
 
 
-def load_review():
-    data_list = read_csv('review.csv')
-    reviews = [
-        Review(
-            id=row['id'],
-            text=row['text'],
-            author=User.objects.get(id=row['author']),
-            title=Title.objects.get(id=row['title_id']),
-            score=row['score'],
-            pub_date=row['pub_date']
-        )
-        for row in data_list
-    ]
-    Review.objects.bulk_create(reviews)
-
-
-def load_comments():
-    data_list = read_csv('comments.csv')
-    comments = [
-        Comment(
-            id=row['id'],
-            text=row['text'],
-            author=User.objects.get(id=row['author']),
-            review=Review.objects.get(id=row['review_id']),
-            pub_date=row['pub_date']
-        )
-        for row in data_list
-    ]
-    Comment.objects.bulk_create(comments)
+def del_data():
+    """Удаляет все таблицы из базы данных"""
+    for model in DATA:
+        model.objects.all().delete()
 
 
 class Command(BaseCommand):
@@ -120,23 +92,36 @@ class Command(BaseCommand):
             action='store_true',
             help='Импортирует все таблицы из csv в базу данных'
         )
+        parser.add_argument(
+            '-d',
+            '--delete',
+            action='store_true',
+            help='Удаляет все данные из базы данных'
+        )
 
     def handle(self, *args, **options):
-        if options['all']:
-            try:
-                load_users()
-                load_categories()
-                load_genres()
-                load_titles()
+        try:
+            if options['all']:
+                for model, name_file in DATA.items():
+                    load_data(model, name_file)
                 load_genre_title()
-                load_review()
-                load_comments()
                 self.stdout.write(
-                    self.style.SUCCESS('Таблицы загружены в БД'))
-            except Exception as e:
-                self.stdout.write(self.style.ERROR('Ошибка загрузки данных:'
-                                                   ' "%s"' % e))
-        else:
+                    self.style.SUCCESS('Таблицы загружены в базу данных.'))
+            elif options['delete']:
+                del_data()
+                self.stdout.write(
+                    self.style.SUCCESS('База данных успешно очищена.'))
+            else:
+                self.stdout.write(
+                    self.style.SQL_KEYWORD('Команда используется с ключом,'
+                                           ' список всех ключей: --help'))
+        except django.db.utils.IntegrityError as e:
             self.stdout.write(
-                self.style.SQL_KEYWORD('Команда используется с ключом -a,'
-                                       ' или --all'))
+                self.style.ERROR('Ошибка загрузки. База данных не пуста. '
+                                 'Совпадение уникальных полей. "%s"' % e))
+        except ObjectDoesNotExist:
+            self.stdout.write(
+                self.style.NOTICE('Нет данных из связанных таблиц'))
+        except Exception as e:
+            self.stdout.write(self.style.ERROR('Ошибка загрузки данных:'
+                                               ' "%s"' % e))
