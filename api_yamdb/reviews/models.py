@@ -68,11 +68,6 @@ class Title(models.Model):
         related_name='titles',
         null=True
     )
-    rating = models.IntegerField(
-        verbose_name='Рейтинг',
-        null=True,
-        default=None
-    )
 
     def __str__(self):
         return self.name
@@ -112,7 +107,7 @@ class Review(models.Model):
     )
 
     def __str__(self):
-        return self.text[:15]
+        return self.text
 
     class Meta:
         verbose_name = 'Отзыв'
@@ -148,7 +143,7 @@ class Comment(models.Model):
     )
 
     def __str__(self):
-        return self.text[:15]
+        return self.text
 
     class Meta:
         verbose_name = 'Комментарий'
