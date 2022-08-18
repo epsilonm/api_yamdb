@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, mixins, permissions, filters
+from rest_framework import viewsets, permissions, filters
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
@@ -91,15 +91,6 @@ class UserJWTTokenCreateView(APIView):
             data=serializer.errors,
             status=HTTPStatus.BAD_REQUEST
         )
-
-
-class ListCreateDestroyViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
-):
-    pass
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
