@@ -93,8 +93,8 @@ class Command(BaseCommand):
             help='Импортирует все таблицы из csv в базу данных'
         )
         parser.add_argument(
-            '-d',
-            '--delete',
+            '-c',
+            '--clear',
             action='store_true',
             help='Удаляет все данные из базы данных'
         )
@@ -107,7 +107,7 @@ class Command(BaseCommand):
                 load_genre_title()
                 self.stdout.write(
                     self.style.SUCCESS('Таблицы загружены в базу данных.'))
-            elif options['delete']:
+            elif options['clear']:
                 del_data()
                 self.stdout.write(
                     self.style.SUCCESS('База данных успешно очищена.'))
