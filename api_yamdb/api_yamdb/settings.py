@@ -127,17 +127,10 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 DEFAULT_FROM_EMAIL = 'epsilon@yatube.com'
 
 USER_ROLES = (
-<<<<<<< HEAD
-        ('user', 'User'),
-        ('moderator', 'Moderator'),
-        ('admin', 'Admin'),
-    )
-=======
     ('user', 'User'),
     ('moderator', 'Moderator'),
     ('admin', 'Admin'),
 )
->>>>>>> 5638cbd... Merge pull request #8 from epsilonm/feature/get_permissions
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=300),
@@ -172,7 +165,3 @@ SIMPLE_JWT = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
-<<<<<<< HEAD
-
-=======
->>>>>>> 5638cbd... Merge pull request #8 from epsilonm/feature/get_permissions

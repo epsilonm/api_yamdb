@@ -112,7 +112,7 @@ class Review(models.Model):
     )
 
     def __str__(self):
-        return self.text[:15]
+        return self.text
 
     class Meta:
         verbose_name = 'Отзыв'
@@ -148,7 +148,7 @@ class Comment(models.Model):
     )
 
     def __str__(self):
-        return self.text[:15]
+        return self.text
 
     class Meta:
         verbose_name = 'Комментарий'
