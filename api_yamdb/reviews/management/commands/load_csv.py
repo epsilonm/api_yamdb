@@ -77,6 +77,7 @@ def load_genre_title():
 
 
 def del_data():
+    """Удаляет все таблицы из базы данных"""
     for model in DATA:
         model.objects.all().delete()
 
