@@ -67,42 +67,33 @@ def user_create_view(request):
             return Response(serializer.data, status=HTTPStatus.OK)
     return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
 
-
-class UserJWTTokenCreateView(generics.CreateAPIView):
-    serializer_class = UserJWTTokenCreateSerializer
-    permission_classes = [permissions.AllowAny]
-
-    def perfom_create(self, request):
-        serializer = self.serializer_class(data=self.request.data)
-        if serializer.is_valid():
-            confirmation_code = serializer.data.get('confirmation_code')
-            username = serializer.data.get('username')
-            if User.objects.filter(username=username).exists():
-                if User.objects.filter(
-                        username=username,
-                        confirmation_code=confirmation_code
-                ).exists():
-                    user = User.objects.get(
-                        username=username,
-                        confirmation_code=confirmation_code
-                    )
-                    token = AccessToken.for_user(user)
-                    return Response(
-                        data={'token': str(token)},
-                        status=HTTPStatus.OK
-                    )
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def user_jwt_token_create_view(request):
+    serializer = UserJWTTokenCreateSerializer(data=request.data)
+    if serializer.is_valid():
+        confirmation_code = serializer.validated_data.get('confirmation_code')
+        username = serializer.validated_data.get('username')
+        user = get_object_or_404(User, username=username)
+        if user:
+            if default_token_generator.check_token(user, confirmation_code):
+                token = AccessToken.for_user(user)
                 return Response(
-                    'Confirmation code is incorrect!',
-                    status=HTTPStatus.BAD_REQUEST
+                    data={'token': str(token)},
+                    status=HTTPStatus.OK
                 )
             return Response(
-                'User with this username does not exist',
-                status=HTTPStatus.NOT_FOUND
+                'Confirmation code is incorrect!',
+                status=HTTPStatus.BAD_REQUEST
             )
         return Response(
-            data=serializer.errors,
-            status=HTTPStatus.BAD_REQUEST
+            'User with this username does not exist',
+            status=HTTPStatus.NOT_FOUND
         )
+    return Response(
+        data=serializer.errors,
+        status=HTTPStatus.BAD_REQUEST
+    )
 
 
 class ListCreateDestroyViewSet(
