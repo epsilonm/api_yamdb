@@ -3,6 +3,8 @@ from django.db import models
 
 from users.models import User
 
+from .validators import validate_actual_year
+
 
 class Category(models.Model):
     name = models.CharField(
@@ -48,8 +50,9 @@ class Title(models.Model):
         max_length=256,
         verbose_name='Название'
     )
-    year = models.IntegerField(
-        verbose_name='Год выпуска'
+    year = models.PositiveSmallIntegerField(
+        verbose_name='Год выпуска',
+        validators=[validate_actual_year]
     )
     description = models.TextField(
         verbose_name='Описание',
