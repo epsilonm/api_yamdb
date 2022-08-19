@@ -36,7 +36,6 @@ class UserJWTTokenCreateSerializer(serializers.Serializer):
 
     class Meta:
         model = User
-        fields = ('confirmation_code', 'username')
 
 
 class CategorySerializer(serializers.ModelSerializer):

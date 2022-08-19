@@ -88,7 +88,7 @@ def user_jwt_token_create_view(request):
             )
         return Response(
             'User with this username does not exist',
-            status=HTTPStatus.NOT_FOUND
+            status=HTTPStatus.BAD_REQUEST
         )
     return Response(
         data=serializer.errors,
