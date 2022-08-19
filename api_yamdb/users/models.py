@@ -37,6 +37,9 @@ class User(AbstractUser):
                             choices=USER_ROLES,
                             default='user')
 
+    class Meta:
+        ordering = ['username']
+
     @property
     def is_admin(self):
         return self.role == User.ADMIN
