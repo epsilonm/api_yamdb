@@ -1,23 +1,17 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.db.models import Avg
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 
 from reviews.models import Category, Genre, Title, Review, Comment
-from .validators import UserNameValidator
 
 User = get_user_model()
 
 
 class UsersSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
-        validators = [UserNameValidator]
         fields = ('username', 'email', 'first_name', 'last_name',
                   'bio', 'role')
 
@@ -26,7 +20,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('username', 'email')
-        validators = [UserNameValidator]
         model = User
 
 
