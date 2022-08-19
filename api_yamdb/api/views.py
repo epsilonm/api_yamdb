@@ -13,6 +13,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, Title, Review
 from users.models import User
 from .filters import TitleFilter
+from .mixins import ListCreateDestroyViewSet
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
                           IsOwnerAdminModeratorOrReadOnly)
 from .serializers import (UsersSerializer, CreateUserSerializer,
@@ -92,15 +93,6 @@ class UserJWTTokenCreateView(APIView):
             data=serializer.errors,
             status=HTTPStatus.BAD_REQUEST
         )
-
-
-class ListCreateDestroyViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
-):
-    pass
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
