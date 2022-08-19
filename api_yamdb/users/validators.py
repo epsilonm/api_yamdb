@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 def validate_username(value):
-    if value == 'me':
+    if value.lower() == 'me':
         raise ValidationError(
             _(f'{value} is forbidden username!')
         )
