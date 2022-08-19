@@ -1,9 +1,11 @@
 from http import HTTPStatus
-
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, mixins, permissions, filters
-from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework import viewsets, mixins, permissions, filters, generics
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,7 +17,7 @@ from .filters import TitleFilter
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
                           IsOwnerAdminModeratorOrReadOnly)
 from .serializers import (UsersSerializer, CreateUserSerializer,
-                          UserJWTTokenCreateSerializer, UserPatchSerializer,
+                          UserJWTTokenCreateSerializer,
                           CategorySerializer, GenreSerializer,
                           ReviewSerializer, CommentSerializer,
                           TitlesEditorSerializer, TitlesReadSerializer)
@@ -31,8 +33,7 @@ class UsersViewSet(viewsets.ModelViewSet):
 
     @action(methods=['patch', 'get'], detail=False,
             permission_classes=[permissions.IsAuthenticated],
-            url_path='me', url_name='me',
-            serializer_class=UserPatchSerializer)
+            url_path='me', url_name='me')
     def me(self, request, *args, **kwargs):
         instance = self.request.user
         serializer = self.get_serializer(instance)
@@ -40,27 +41,38 @@ class UsersViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(
                 instance, data=request.data, partial=True)
             serializer.is_valid()
+            serializer.save(role=self.request.user.role)
+        return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def user_create_view(request):
+    serializer = CreateUserSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data.get('email')
+        username = serializer.validated_data.get('username')
+        queryset = User.objects.filter(email=email, username=username)
+        if not queryset.exists():
             serializer.save()
-        return Response(serializer.data)
+            confirmation_code = default_token_generator.make_token(
+                User(email=email, username=username)
+            )
+            message = (f'Здравствуйте, {username}! '
+                       f'Ваш код подтверждения: {confirmation_code}')
+            send_mail(message=message,
+                      subject='Confirmation code',
+                      recipient_list=[email],
+                      from_email=None)
+            return Response(serializer.data, status=HTTPStatus.OK)
+    return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
 
 
-class UserCreateView(APIView):
-    serializer_class = CreateUserSerializer
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        serializer = self.serializer_class(data=self.request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data)
-
-
-class UserJWTTokenCreateView(APIView):
+class UserJWTTokenCreateView(generics.CreateAPIView):
     serializer_class = UserJWTTokenCreateSerializer
     permission_classes = [permissions.AllowAny]
 
-    def post(self, request):
+    def perfom_create(self, request):
         serializer = self.serializer_class(data=self.request.data)
         if serializer.is_valid():
             confirmation_code = serializer.data.get('confirmation_code')
