@@ -1,9 +1,10 @@
-from api.views import (CategoryViewSet, GenreViewSet, TitleViewSet,
-                       ReviewViewSet, CommentViewSet)
 from django.urls import include, path
 from rest_framework import routers
 
-from api.views import UsersViewSet, user_create_view, user_jwt_token_create_view
+from api.views import (CategoryViewSet, GenreViewSet, TitleViewSet,
+                       ReviewViewSet, CommentViewSet)
+from api.views import (UsersViewSet, user_create_view,
+                       user_jwt_token_create_view)
 
 router_version_1 = routers.DefaultRouter()
 router_version_1.register('users', UsersViewSet, basename='users')
