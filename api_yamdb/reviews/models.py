@@ -3,6 +3,8 @@ from django.db import models
 
 from users.models import User
 
+from .validators import validate_actual_year
+
 
 class Category(models.Model):
     name = models.CharField(
@@ -48,8 +50,9 @@ class Title(models.Model):
         max_length=256,
         verbose_name='Название'
     )
-    year = models.IntegerField(
-        verbose_name='Год выпуска'
+    year = models.PositiveSmallIntegerField(
+        verbose_name='Год выпуска',
+        validators=[validate_actual_year]
     )
     description = models.TextField(
         verbose_name='Описание',
@@ -67,11 +70,6 @@ class Title(models.Model):
         on_delete=models.SET_NULL,
         related_name='titles',
         null=True
-    )
-    rating = models.IntegerField(
-        verbose_name='Рейтинг',
-        null=True,
-        default=None
     )
 
     def __str__(self):
@@ -112,7 +110,7 @@ class Review(models.Model):
     )
 
     def __str__(self):
-        return self.text[:15]
+        return self.text
 
     class Meta:
         verbose_name = 'Отзыв'
@@ -148,7 +146,7 @@ class Comment(models.Model):
     )
 
     def __str__(self):
-        return self.text[:15]
+        return self.text
 
     class Meta:
         verbose_name = 'Комментарий'
