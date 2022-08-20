@@ -97,7 +97,6 @@ class BaseFeedback(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['pub_date']
 
 
 class Review(BaseFeedback):
@@ -122,6 +121,7 @@ class Review(BaseFeedback):
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+        ordering = ['pub_date']
         constraints = [
             models.UniqueConstraint(
                 fields=['title', 'author'],
@@ -149,3 +149,4 @@ class Comment(BaseFeedback):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+        ordering = ['pub_date']
