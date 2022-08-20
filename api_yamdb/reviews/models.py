@@ -81,12 +81,25 @@ class Title(models.Model):
         ordering = ['name']
 
 
-class Review(models.Model):
-
+class BaseFeedback(models.Model):
     text = models.TextField(
         verbose_name='Текст отзыва',
         help_text='Введите текст отзыва'
     )
+    pub_date = models.DateTimeField(
+        'Дата публикации',
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return self.text
+
+    class Meta:
+        abstract = True
+        ordering = ['pub_date']
+
+
+class Review(BaseFeedback):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -104,18 +117,10 @@ class Review(models.Model):
         validators=(MinValueValidator(1, 'Оценка должна быть от 1 до 10'),
                     MaxValueValidator(10, 'Оценка должна быть от 1 до 10'))
     )
-    pub_date = models.DateTimeField(
-        'Дата публикации',
-        auto_now_add=True
-    )
-
-    def __str__(self):
-        return self.text
 
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
-        ordering = ['pub_date']
         constraints = [
             models.UniqueConstraint(
                 fields=['title', 'author'],
@@ -124,8 +129,7 @@ class Review(models.Model):
         ]
 
 
-class Comment(models.Model):
-    text = models.TextField()
+class Comment(BaseFeedback):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -140,15 +144,7 @@ class Comment(models.Model):
         blank=True,
         null=True
     )
-    pub_date = models.DateTimeField(
-        'Дата публикации',
-        auto_now_add=True, db_index=True
-    )
-
-    def __str__(self):
-        return self.text
 
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        ordering = ['pub_date']
