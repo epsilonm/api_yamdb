@@ -1,8 +1,7 @@
 from http import HTTPStatus
-from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.exceptions import ParseError
-from django.contrib.auth.tokens import default_token_generator
+
 from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -25,6 +24,7 @@ from .serializers import (UsersSerializer, CreateUserSerializer,
                           TitlesEditorSerializer, TitlesReadSerializer)
 
 User = get_user_model()
+
 
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

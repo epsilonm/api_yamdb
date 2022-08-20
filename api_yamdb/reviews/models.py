@@ -22,7 +22,7 @@ class BaseClass(models.Model):
         return self.name
 
     class Meta:
-        abstract=True
+        abstract = True
         ordering = ['name']
 
 
