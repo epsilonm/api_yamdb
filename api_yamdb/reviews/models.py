@@ -5,33 +5,14 @@ from django.db import models
 from .validators import validate_actual_year
 
 
-class Category(models.Model):
-    name = models.CharField(
-        max_length=256,
-        verbose_name='Название')
-
-    slug = models.SlugField(
-        max_length=50,
-        verbose_name='ID',
-        unique=True)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = 'Категория'
-        verbose_name_plural = 'Категории'
-        ordering = ['name']
-
-
-class Genre(models.Model):
+class BaseClass(models.Model):
     name = models.CharField(
         max_length=256,
         verbose_name='Название'
     )
     slug = models.SlugField(
-        verbose_name='ID',
         max_length=50,
+        verbose_name='ID',
         unique=True
     )
 
@@ -39,9 +20,22 @@ class Genre(models.Model):
         return self.name
 
     class Meta:
+        abstract=True
+        ordering = ['name']
+
+
+class Category(BaseClass):
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории' 
+
+
+class Genre(BaseClass):
+
+    class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
-        ordering = ['name']
 
 
 class Title(models.Model):
