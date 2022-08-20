@@ -1,7 +1,8 @@
 from http import HTTPStatus
-
-from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.exceptions import ParseError
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -25,13 +26,11 @@ from .serializers import (UsersSerializer, CreateUserSerializer,
 
 User = get_user_model()
 
-
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     permission_classes = [IsAdmin]
     serializer_class = UsersSerializer
     lookup_field = 'username'
-    lookup_value_regex = '[^/]+'
     pagination_class = LimitOffsetPagination
 
     @action(methods=['patch', 'get'], detail=False,
@@ -43,7 +42,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         if self.request.method == 'PATCH':
             serializer = self.get_serializer(
                 instance, data=request.data, partial=True)
-            serializer.is_valid()
+            serializer.is_valid(raise_exception=True)
             serializer.save(role=self.request.user.role)
         return Response(serializer.data)
 
@@ -52,50 +51,38 @@ class UsersViewSet(viewsets.ModelViewSet):
 @permission_classes([permissions.AllowAny])
 def user_create_view(request):
     serializer = CreateUserSerializer(data=request.data)
-    if serializer.is_valid():
-        email = serializer.validated_data.get('email')
-        username = serializer.validated_data.get('username')
-        queryset = User.objects.filter(email=email, username=username)
-        if not queryset.exists():
-            serializer.save()
-            confirmation_code = default_token_generator.make_token(
-                User(email=email, username=username)
-            )
-            message = (f'Здравствуйте, {username}! '
-                       f'Ваш код подтверждения: {confirmation_code}')
-            send_mail(message=message,
-                      subject='Confirmation code',
-                      recipient_list=[email],
-                      from_email=None)
-            return Response(serializer.data, status=HTTPStatus.OK)
-    return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
+    email = serializer.validated_data.get('email')
+    username = serializer.validated_data.get('username')
+    serializer.save()
+    confirmation_code = default_token_generator.make_token(
+        User.objects.get(email=email, username=username)
+    )
+    MESSAGE = (f'Здравствуйте, {username}! '
+               f'Ваш код подтверждения: {confirmation_code}')
+    send_mail(message=MESSAGE,
+              subject='Confirmation code',
+              recipient_list=[email],
+              from_email=None)
+    return Response(serializer.data, status=HTTPStatus.OK)
 
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def user_jwt_token_create_view(request):
     serializer = UserJWTTokenCreateSerializer(data=request.data)
-    if serializer.is_valid():
-        confirmation_code = serializer.validated_data.get('confirmation_code')
-        username = serializer.validated_data.get('username')
-        user = get_object_or_404(User, username=username)
-        if user:
-            if default_token_generator.check_token(user, confirmation_code):
-                token = AccessToken.for_user(user)
-                return Response(
-                    data={'token': str(token)},
-                    status=HTTPStatus.OK
-                )
-            return Response(
-                'Confirmation code is incorrect!',
-                status=HTTPStatus.BAD_REQUEST
-            )
+    serializer.is_valid(raise_exception=True)
+    confirmation_code = serializer.validated_data.get('confirmation_code')
+    username = serializer.validated_data.get('username')
+    user = get_object_or_404(User, username=username)
+    if default_token_generator.check_token(user, confirmation_code):
+        token = AccessToken.for_user(user)
         return Response(
-            'User with this username does not exist',
-            status=HTTPStatus.BAD_REQUEST
+            data={'token': str(token)},
+            status=HTTPStatus.OK
         )
     return Response(
-        data=serializer.errors,
+        'Неверный код подтверждения или имя пользователя!',
         status=HTTPStatus.BAD_REQUEST
     )
 
