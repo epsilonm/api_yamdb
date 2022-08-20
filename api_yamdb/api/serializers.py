@@ -23,11 +23,8 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
 
 class UserJWTTokenCreateSerializer(serializers.Serializer):
-    confirmation_code = serializers.CharField()
-    username = serializers.CharField()
-
-    class Meta:
-        model = User
+    confirmation_code = serializers.CharField(required=True)
+    username = serializers.CharField(required=True)
 
 
 class CategorySerializer(serializers.ModelSerializer):
