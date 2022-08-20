@@ -97,6 +97,7 @@ class BaseFeedback(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['pub_date']
 
 
 class Review(BaseFeedback):
@@ -118,10 +119,9 @@ class Review(BaseFeedback):
                     MaxValueValidator(10, 'Оценка должна быть от 1 до 10'))
     )
 
-    class Meta:
+    class Meta(BaseFeedback.Meta):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
-        ordering = ['pub_date']
         constraints = [
             models.UniqueConstraint(
                 fields=['title', 'author'],
@@ -146,7 +146,6 @@ class Comment(BaseFeedback):
         null=True
     )
 
-    class Meta:
+    class Meta(BaseFeedback.Meta):
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        ordering = ['pub_date']
