@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
@@ -12,7 +13,6 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Genre, Title, Review
-from users.models import User
 from .filters import TitleFilter
 from .mixins import ListCreateDestroyViewSet
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
@@ -22,6 +22,8 @@ from .serializers import (UsersSerializer, CreateUserSerializer,
                           CategorySerializer, GenreSerializer,
                           ReviewSerializer, CommentSerializer,
                           TitlesEditorSerializer, TitlesReadSerializer)
+
+User = get_user_model()
 
 
 class UsersViewSet(viewsets.ModelViewSet):
