@@ -6,11 +6,11 @@ from rest_framework import routers
 from api.views import UsersViewSet, UserCreateView, UserJWTTokenCreateView
 
 router_version_1 = routers.DefaultRouter()
-router_version_1.register(r'users', UsersViewSet, basename='users')
-router_version_1.register(r'categories', CategoryViewSet,
+router_version_1.register('users', UsersViewSet, basename='users')
+router_version_1.register('categories', CategoryViewSet,
                           basename='categories')
-router_version_1.register(r'genres', GenreViewSet, basename='genres')
-router_version_1.register(r'titles', TitleViewSet, basename='titles')
+router_version_1.register('genres', GenreViewSet, basename='genres')
+router_version_1.register('titles', TitleViewSet, basename='titles')
 router_version_1.register(r'titles/(?P<title_id>\d+)/reviews',
                           ReviewViewSet, basename='reviews')
 router_version_1.register(r'titles/(?P<title_id>\d+)/reviews'
