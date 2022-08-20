@@ -5,5 +5,9 @@ import re
 def validate_username(value):
     if value.lower() == 'me':
         raise ValidationError(
-            _(f'{value} is forbidden username!')
+            _(f'{value} служебное имя!')
+        )
+    elif re.findall('[@_.+-]', value):
+        raise ValidationError(
+            _(f'{value} не должно содержать символы "@_.+="!')
         )

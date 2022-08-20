@@ -31,7 +31,6 @@ class UsersViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdmin]
     serializer_class = UsersSerializer
     lookup_field = 'username'
-    lookup_value_regex = '[^/]+'
     pagination_class = LimitOffsetPagination
 
     @action(methods=['patch', 'get'], detail=False,
