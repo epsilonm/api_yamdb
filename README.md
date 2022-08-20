@@ -85,7 +85,7 @@ python manage.py runserver
 ```
 python manage.py load_csv --all
 ```
-Чтобы очистить базу данных:
+Чтобы очистить базу данных: 
 ```
 python manage.py load_csv --clear
 ```
