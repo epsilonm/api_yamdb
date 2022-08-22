@@ -77,6 +77,11 @@ class Title(models.Model):
 
 
 class BaseFeedback(models.Model):
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='%(class)s',
+    )
     text = models.TextField(
         verbose_name='Текст отзыва',
         help_text='Введите текст отзыва'
@@ -95,12 +100,6 @@ class BaseFeedback(models.Model):
 
 
 class Review(BaseFeedback):
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='Автор'
-    )
     title = models.ForeignKey(
         Title,
         verbose_name='Произведение',
@@ -125,12 +124,6 @@ class Review(BaseFeedback):
 
 
 class Comment(BaseFeedback):
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Автор'
-    )
     review = models.ForeignKey(
         Review,
         verbose_name='Комментарии',
