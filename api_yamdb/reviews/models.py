@@ -7,7 +7,7 @@ from .validators import validate_actual_year
 User = get_user_model()
 
 
-class BaseClass(models.Model):
+class GenreCategoryBaseClass(models.Model):
     name = models.CharField(
         max_length=256,
         verbose_name='Название'
@@ -26,16 +26,16 @@ class BaseClass(models.Model):
         ordering = ['name']
 
 
-class Category(BaseClass):
+class Category(GenreCategoryBaseClass):
 
-    class Meta(BaseClass.Meta):
+    class Meta(GenreCategoryBaseClass.Meta):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
 
-class Genre(BaseClass):
+class Genre(GenreCategoryBaseClass):
 
-    class Meta(BaseClass.Meta):
+    class Meta(GenreCategoryBaseClass.Meta):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
